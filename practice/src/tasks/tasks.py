@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 
 matplotlib.use('TkAgg')
 
-
-def task_1():
+def get_data():
     data = pd.read_csv('src/resources/dab.csv')
 
     for c in range(len((data.srednica2))):
@@ -14,14 +13,16 @@ def task_1():
 
     X = np.concatenate((np.ones((len(data.values)-1, 1)), data.values[:-1, 0:2].astype(float)), axis=1)
     Y = data.values[:-1, 2].astype(float)
+    
+    return [X,Y]
+
+def task_1():
+    X, Y = get_data()
 
     beta = np.linalg.solve(np.matmul(X.T, X), np.matmul(X.T, Y))
-    print(beta)
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
-
-    print(X)
 
     ax.scatter(X[:, 1], X[:, 2], Y)
     ax.plot(X[:, 1], X[:, 2], np.matmul(X, beta))
@@ -38,5 +39,23 @@ def task_1():
 
     plt.show()
 
+
+
+def task_2():
+    from sklearn.linear_model import LinearRegression
+    
+    X, Y = get_data()
+
+    lr = LinearRegression()
+    lr.fit(X, Y)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+
+    ax.scatter(X[:, 1], X[:, 2], Y)
+    ax.plot(X[:, 1], X[:, 2], lr.predict(X))
+
+    plt.show()
+
 def main():
-    task_1()
+    task_2()
