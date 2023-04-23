@@ -139,5 +139,17 @@ def task_4():
 
     print('MSE', np.mean((y_neg - lr.predict(x2_neg))**2))
 
+
+def task_5():
+    X, Y = get_data()
+
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import cross_val_score
+
+    lr = LinearRegression()
+
+    print(cross_val_score(lr, X, Y, cv=3))
+
+
 def main():
-    task_4()
+    task_5()
