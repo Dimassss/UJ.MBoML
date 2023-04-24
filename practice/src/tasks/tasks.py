@@ -9,7 +9,7 @@ matplotlib.use('TkAgg')
 def minmax(min_v, max_v, v):
     return min(max(min_v, v), max_v)
 
-def task_1():
+def task_1_2():
     N=1000
     df1 = 2*pd.DataFrame(np.random.randn(N, 3), columns=['A', 'B','C'])
     df2 = 20+10*pd.DataFrame(np.random.randn(N, 3), columns=['A', 'B','C'])
@@ -18,7 +18,7 @@ def task_1():
     Data[:,2]=1
     Data[0:N,2]=0
 
-    # my code
+    # TASK 1
 
     ## split data into train and test blocks
     from sklearn.model_selection import train_test_split
@@ -106,6 +106,18 @@ def task_1():
 
     plt.show()
 
+    # TASK 2
+    from sklearn.metrics import classification_report, confusion_matrix
+
+    print('Confusion matrix')
+    print('\nM1\n', confusion_matrix(y_test.reshape(-1, 1), M1.predict(X_test).reshape(-1, 1)))
+    print('\n\nM2\n', confusion_matrix(y_test.reshape(-1, 1), np.array([M2_predict([x]) for x in X_test]).reshape(-1, 1)))
+    print('\n\nM3\n', confusion_matrix(y_test.reshape(-1, 1), M3.predict(X_test).reshape(-1, 1)))
+
+    print('Scores')
+    print('\nM1\n', classification_report(y_test.reshape(-1, 1), M1.predict(X_test).reshape(-1, 1)))
+    print('\n\nM2\n', classification_report(y_test.reshape(-1, 1), np.array([M2_predict([x]) for x in X_test]).reshape(-1, 1)))
+    print('\n\nM3\n', classification_report(y_test.reshape(-1, 1), M3.predict(X_test).reshape(-1, 1)))
 
 def main():
-    task_1()
+    task_1_2()
