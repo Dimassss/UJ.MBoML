@@ -1,0 +1,5 @@
+practice/lib64
+practice/lib
+practice/include
+practice/**/__py_cache__/*
+.ipynb_checkpoints/*

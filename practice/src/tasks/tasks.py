@@ -1,6 +1,6 @@
 import matplotlib
 
-mayplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 
 def main():
     pass
