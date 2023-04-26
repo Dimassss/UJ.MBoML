@@ -192,5 +192,35 @@ def task_4():
     ax.plot_surface(X,Y,Z)
     plt.show()
 
+
+def task_5():
+    def compute_error(a, b, x, y):
+        return np.sum((y - (a*x + b))**2)
+
+    import sklearn.linear_model as lm
+
+    f = lambda x: (x**2)
+
+    x = np.array([.2, .5, .8, .9, 1.3, 1.7, 2.1, 2.7])
+    y = f(x) + np.random.randn(len(x))
+
+    # aproximate linear function with GDM
+    f = lambda v: compute_error(v[0], v[1], x, y)
+    gdm = GDM(f, n=2)
+    alpha = 0.02
+
+    from scipy import optimize
+    import sklearn.linear_model as lm
+    gdm = GDM(f, n=2)
+    res = optimize.fmin_cg(f, np.array([0,0]), fprime=gdm.df)
+
+    lr = lm.LinearRegression()
+    lr.fit(x.reshape(-1,1), y.reshape(-1,1))
+    b = np.array([lr.coef_[0][0], lr.intercept_[0]])
+
+    print(res, b)
+    print('l^2 distance between parameters as poits is', np.sum((b-res)**2)**0.5)
+
+
 def main():
-    task_4()
+    task_5()
