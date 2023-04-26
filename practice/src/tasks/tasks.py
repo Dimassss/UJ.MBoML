@@ -6,6 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 import numpy as np
+import math
 
 matplotlib.use('TkAgg')
 
@@ -24,6 +25,7 @@ class GDM:
 
     def next_step(self, a_n, alpha):
         return a_n - alpha * self.df(a_n)
+
 
 def task_1():
     f = lambda x: x[0]**2
@@ -46,7 +48,7 @@ def task_1():
     plt.show()
 
 
-def task_2():
+def task_2_3():
     S = 50
     f = lambda x: x[0]**2 - 2*x[0] + x[1]**2
     a = [2,2]
@@ -111,5 +113,84 @@ def task_2():
     plt.show()
 
 
+def task_4():
+    def compute_error(a, b, x, y):
+        return np.sum((y - (a*x + b))**2)
+
+    import sklearn.linear_model as lm
+
+    f = lambda x: (x**2)
+
+    x = np.array([.2, .5, .8, .9, 1.3, 1.7, 2.1, 2.7])
+    y = f(x) + np.random.randn(len(x))
+
+    # aproximate linear function with GDM
+    f = lambda v: compute_error(v[0], v[1], x, y)
+    gdm = GDM(f, n=2)
+    alpha = 0.02
+    
+    def aproximate_coefficients(start_point, nsteps):
+        nonlocal gdm, alpha
+
+        for i in range(nsteps):
+            start_point = gdm.next_step(start_point, alpha)
+        
+        return start_point
+
+    coefficients = [aproximate_coefficients(c, 100) for c in [[1,1], [0,0], [4,-4]]]
+    #coefficients = [aproximate_coefficients([1, 1], 60)]
+
+    # create Linear Regression model to compare it to our linear function which were gotten by GDM
+    lr = lm.LinearRegression()
+    lr.fit(x.reshape(-1,1), y.reshape(-1,1))
+
+    # testing
+    def plot_line_points(range_x, range_y, k, c):
+        # y = kx + c
+        # x = (y - c) / k
+
+        y1, y2 = sorted(k * range_x + c)
+
+        if y1 <= range_y[1] and y2 >= range_y[0]:
+            y1 = min(range_y[1], max(range_y[0], y1))
+            y2 = max(range_y[0], min(range_y[1], y2))
+
+            X = (np.array([y1, y2]) - c) / k
+            Y = k * X + c
+            return [X, Y]
+        else:
+            return []
+
+    range_x = np.array([min(x), max(x)])
+    range_y = np.array([min(y), max(y)])
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    for c in coefficients:
+        arr = plot_line_points(range_x, range_y, c[0], c[1])
+        
+        if len(arr) != 2:
+            continue
+
+        ax.plot(arr[0], arr[1])
+
+    X, Y = plot_line_points(range_x, range_y, lr.coef_[0], lr.intercept_)
+    ax.plot(X, Y)
+
+    ax.scatter(x, y)
+
+    plt.show()
+
+
+    # plotting surface of squre error function to see why alpha must be so small.
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    
+    X, Y = np.meshgrid(np.linspace(-80, 80, 50), np.linspace(-80, 80, 50))
+    Z = np.array([[f([X[i, j], Y[i, j]]) for i in range(50)] for j in range(50)])
+    ax.plot_surface(X,Y,Z)
+    plt.show()
+
 def main():
-    task_2()
+    task_4()
