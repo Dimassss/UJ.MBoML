@@ -222,5 +222,70 @@ def task_5():
     print('l^2 distance between parameters as poits is', np.sum((b-res)**2)**0.5)
 
 
+def task_6():
+    def compute_error(a, b, x, y):
+        return np.sum(np.absolute(y - (a*x + b)))
+
+    import sklearn.linear_model as lm
+
+    f = lambda x: (x**2)
+
+    x = np.array([.2, .5, .8, .9, 1.3, 1.7, 2.1, 2.7])
+    y = f(x) + np.random.randn(len(x))
+
+    # aproximate linear function with GDM
+    f = lambda v: compute_error(v[0], v[1], x, y)
+    gdm = GDM(f, n=2)
+    alpha = 0.02
+
+    from scipy import optimize
+    import sklearn.linear_model as lm
+    gdm = GDM(f, n=2)
+    res = optimize.fmin_cg(f, np.array([0,0]), fprime=gdm.df)
+
+    def plot_line_points(range_x, range_y, k, c):
+        # y = kx + c
+        # x = (y - c) / k
+
+        y1, y2 = sorted(k * range_x + c)
+
+        if k == 0:
+            if range_y[0] <= y1 and y1 <= range_y[1]:
+                return [range_x, [y1, y2]]
+            else:
+                return []
+
+        if y1 <= range_y[1] and y2 >= range_y[0]:
+            y1 = min(range_y[1], max(range_y[0], y1))
+            y2 = max(range_y[0], min(range_y[1], y2))
+
+            X = (np.array([y1, y2]) - c) / k
+            Y = k * X + c
+            return [X, Y]
+        else:
+            return []
+
+    range_x = np.array([min(x), max(x)])
+    range_y = np.array([min(y), max(y)])
+
+    fig = plt.figure()
+    ax = fig.add_subplot(211)
+
+    print(res)
+    arr = plot_line_points(range_x, range_y, res[0], res[1])
+        
+    if len(arr) == 2:
+        ax.plot(arr[0], arr[1])
+
+    ax.scatter(x, y)
+
+    # plotting surface of squre error function to see why answer is [0,0]
+    ax = fig.add_subplot(212, projection='3d')
+    
+    X, Y = np.meshgrid(np.linspace(-10, 10, 50), np.linspace(-10, 10, 50))
+    Z = np.array([[f([X[i, j], Y[i, j]]) for i in range(50)] for j in range(50)])
+    ax.plot_surface(X,Y,Z)
+    plt.show()
+
 def main():
-    task_5()
+    task_6()
