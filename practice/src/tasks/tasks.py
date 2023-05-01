@@ -5,6 +5,9 @@ import sklearn.preprocessing as pr
 import numpy as np
 import pandas as pd
 import math
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import datasets
+from sklearn.model_selection import train_test_split, GridSearchCV
 
 matplotlib.use('TkAgg')
 
@@ -81,8 +84,6 @@ def task_2():
 
 
 def task_3():
-    from sklearn.metrics import classification_report, confusion_matrix
-
     N = 3000
 
     df1 = lambda n: 5 * pd.DataFrame(np.random.randn(n, 3), columns=['A', 'B','C'])
@@ -106,20 +107,20 @@ def task_3():
     print('log_reg2 R2 score:', log_reg2.score(Data2[:, :-1], Data2[:, -1:]))
 
     # First train but with penalty functions and lamda \in [1, 10]
-    log_reg3 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(1 + len(Data2[:, :-1])))
+    log_reg3 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(1 * len(Data2[:, :-1])))
     log_reg3.fit(Data[:, 0:2], Data[:, 2])
     print('log_reg3 R2 score:', log_reg3.score(Data[:, 0:2], Data[:, 2]))
 
-    log_reg4 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(10 + len(Data2[:, :-1])))
+    log_reg4 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(10 * len(Data2[:, :-1])))
     log_reg4.fit(Data[:, 0:2], Data[:, 2])
     print('log_reg4 R2 score:', log_reg4.score(Data[:, 0:2], Data[:, 2]))
 
     # Second train but with penalty functions and lamda \in [1, 10]
-    log_reg5 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(1 + len(Data2[:, :-1])))
+    log_reg5 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(1 * len(Data2[:, :-1])))
     log_reg5.fit(Data2[:, :-1], Data2[:, -1:])
     print('log_reg5 R2 score:', log_reg5.score(Data2[:, :-1], Data2[:, -1:]))
 
-    log_reg6 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(10 + len(Data2[:, :-1])))
+    log_reg6 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(10 * len(Data2[:, :-1])))
     log_reg6.fit(Data2[:, :-1], Data2[:, -1:])
     print('log_reg6 R2 score:', log_reg6.score(Data2[:, :-1], Data2[:, -1:]))
 
@@ -177,6 +178,63 @@ def task_3():
     plt.legend()
     plt.show()
 
+
+def task_4():
+    iris = datasets.load_iris()
+    X = iris.data[:, :2]  # we only take the first two features.
+    y = iris.target
+
+    def with_regularization(X, y, ax=plt):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        scaler = pr.StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+
+        clf = GridSearchCV(lm.LogisticRegression(penalty='l2', solver='liblinear'), {'C': [1/(i * len(X_train)) for i in range(1, 10)]}, cv=5)
+        clf.fit(X_train_scaled, y_train)
+        best_C = clf.best_params_['C']
+
+        lr = lm.LogisticRegression(penalty='l2', C=best_C)
+        lr.fit(X_train_scaled, y_train)
+        
+        print(classification_report(y_test, lr.predict(X_test_scaled)))
+        print('lambda='+str(1/(best_C*len(X_train)))+'; R2='+str(lr.score(X_test_scaled, y_test))+';\n', confusion_matrix(y_test, lr.predict(X_test_scaled)))
+
+        OX = np.linspace(min(X[:, 0]), max(X[:, 0]), 100)
+        OY = np.linspace(min(X[:, 1]), max(X[:, 1]), 100)
+        Xp, Yp = np.meshgrid(OX, OY)
+        Zp = [lr.predict(scaler.transform([[Xp[i,j], Yp[i,j]] for j in range(100)])) for i in range(100)]
+
+        ax.contourf(Xp, Yp, Zp)
+        ax.scatter(X[:, 0], X[:, 1], c=y)
+
+    def without_refularization(X, y, ax=plt):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        scaler = pr.StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+
+        lr = lm.LogisticRegression()
+        lr.fit(X_train_scaled, y_train)
+        
+        print(classification_report(y_test, lr.predict(X_test_scaled)))
+        print('R2='+str(lr.score(X_test_scaled, y_test))+';\n', confusion_matrix(y_test, lr.predict(X_test_scaled)))
+
+        OX = np.linspace(min(X[:, 0]), max(X[:, 0]), 100)
+        OY = np.linspace(min(X[:, 1]), max(X[:, 1]), 100)
+        Xp, Yp = np.meshgrid(OX, OY)
+        Zp = [lr.predict(scaler.transform([[Xp[i,j], Yp[i,j]] for j in range(100)])) for i in range(100)]
+
+        ax.contourf(Xp, Yp, Zp)
+        ax.scatter(X[:, 0], X[:, 1], c=y)
+
+
+    fig = plt.figure()
+    with_regularization(X, y, fig.add_subplot(211))
+    without_refularization(X, y, fig.add_subplot(212))
+    plt.show()
 
 def main():
     task_3()
