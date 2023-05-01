@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import sklearn.linear_model as lm
 import sklearn.preprocessing as pr
 import numpy as np
+import pandas as pd
 import math
 
 matplotlib.use('TkAgg')
@@ -80,8 +81,102 @@ def task_2():
 
 
 def task_3():
-    pass
+    from sklearn.metrics import classification_report, confusion_matrix
+
+    N = 3000
+
+    df1 = lambda n: 5 * pd.DataFrame(np.random.randn(n, 3), columns=['A', 'B','C'])
+    df2 = lambda n: 10 + 10 * pd.DataFrame(np.random.randn(n, 3), columns=['A', 'B','C'])
+
+    Data = np.concatenate((df1(N), df2(N)), axis=0)
+    Data[:,2] = 1
+    Data[0:N,2] = 0
+
+    # Train on X[:, 0:2]
+    log_reg1 = lm.LogisticRegression()
+    log_reg1.fit(Data[:, 0:2], Data[:, 2])
+
+    print('log_reg1 R2 score:', log_reg1.score(Data[:, :-1], Data[:, -1:]))
+
+    # Train on X[:, 1] and powers of X[:, 0] from 0 to 4
+    Data2 = np.hstack((pr.PolynomialFeatures(4).fit_transform(Data[:, :1]), Data[:, 1:]))
+    log_reg2 = lm.LogisticRegression()
+    log_reg2.fit(Data2[:, :-1], Data2[:, -1:])
+
+    print('log_reg2 R2 score:', log_reg2.score(Data2[:, :-1], Data2[:, -1:]))
+
+    # First train but with penalty functions and lamda \in [1, 10]
+    log_reg3 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(1 + len(Data2[:, :-1])))
+    log_reg3.fit(Data[:, 0:2], Data[:, 2])
+    print('log_reg3 R2 score:', log_reg3.score(Data[:, 0:2], Data[:, 2]))
+
+    log_reg4 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(10 + len(Data2[:, :-1])))
+    log_reg4.fit(Data[:, 0:2], Data[:, 2])
+    print('log_reg4 R2 score:', log_reg4.score(Data[:, 0:2], Data[:, 2]))
+
+    # Second train but with penalty functions and lamda \in [1, 10]
+    log_reg5 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(1 + len(Data2[:, :-1])))
+    log_reg5.fit(Data2[:, :-1], Data2[:, -1:])
+    print('log_reg5 R2 score:', log_reg5.score(Data2[:, :-1], Data2[:, -1:]))
+
+    log_reg6 = lm.LogisticRegression(penalty='l2', solver='liblinear', C=1/(10 + len(Data2[:, :-1])))
+    log_reg6.fit(Data2[:, :-1], Data2[:, -1:])
+    print('log_reg6 R2 score:', log_reg6.score(Data2[:, :-1], Data2[:, -1:]))
+
+    # Printing scores:
+    print(classification_report(Data[:, -1:], log_reg1.predict(Data[:, :-1])))
+    print(confusion_matrix(Data[:, -1:], log_reg1.predict(Data[:, :-1])))
+    print(classification_report(Data2[:, -1:], log_reg2.predict(Data2[:, :-1])))
+    print(confusion_matrix(Data2[:, -1:], log_reg2.predict(Data2[:, :-1])))
+    print(classification_report(Data[:, -1:], log_reg3.predict(Data[:, :-1])))
+    print(confusion_matrix(Data[:, -1:], log_reg3.predict(Data[:, :-1])))
+    print(classification_report(Data[:, -1:], log_reg4.predict(Data[:, :-1])))
+    print(confusion_matrix(Data[:, -1:], log_reg4.predict(Data[:, :-1])))
+    print(classification_report(Data2[:, -1:], log_reg5.predict(Data2[:, :-1])))
+    print(confusion_matrix(Data2[:, -1:], log_reg5.predict(Data2[:, :-1])))
+    print(classification_report(Data2[:, -1:], log_reg6.predict(Data2[:, :-1])))
+    print(confusion_matrix(Data2[:, -1:], log_reg6.predict(Data2[:, :-1])))
+
+    # Prepare before plotting decision boundaries
+
+    ## c + bx = 0
+    ## bx = -c
+    ## b1*x1 = -c - b'*x'
+    ## x1 = -(c + b'*x') / b1
+    x1 = lambda x, lr: -(lr.intercept_[0] + np.dot(np.array(x), lr.coef_[0][:-1])) / lr.coef_[0][-1]
+
+    # Plot decision boundaries for log_reg1 and log_reg2
+    y_lims = 1.1 * np.array([min(Data[:, 1]), max(Data[:, 1])])
+    x_lims = 1.1 * np.array([min(Data[:, 0]), max(Data[:, 0])])
+    OX = np.linspace(*x_lims, 100).reshape(-1,1)
+    OY1 = np.array([x1(x, log_reg1) for x in OX])
+    OY2 = np.array([x1(x, log_reg2) for x in pr.PolynomialFeatures(4).fit_transform(OX)])
+    OY3 = np.array([x1(x, log_reg3) for x in OX])
+    OY4 = np.array([x1(x, log_reg4) for x in OX])
+    OY5 = np.array([x1(x, log_reg5) for x in pr.PolynomialFeatures(4).fit_transform(OX)])
+    OY6 = np.array([x1(x, log_reg6) for x in pr.PolynomialFeatures(4).fit_transform(OX)])
+    
+    # Ploting countourf 
+    ## OY = np.linspace(*y_lims, 100).reshape(-1,1)
+    ## X,Y = np.meshgrid(OX, OY)
+    ## Z1 = [log_reg1.predict([[X[i,j], Y[i,j]] for j in range(100)]) for i in range(100)]
+    ## Z2 = [log_reg2.predict([[*(lambda x: [x**i for i in range(5)])(X[i,j]), Y[i,j]] for j in range(100)]) for i in range(100)]
+    ## plt.contourf(X, Y, Z2)
+
+    plt.plot(OX, OY1, label='t1 no penalty')
+    plt.plot(OX, OY2, label='t2 no penalty')
+    plt.plot(OX, OY3, label='t1, lambda=1')
+    plt.plot(OX, OY4, label='t1, lambda=10')
+    plt.plot(OX, OY5, label='t2, lambda=1')
+    plt.plot(OX, OY6, label='t2, lambda=10')
+    plt.ylim(*y_lims)
+    plt.xlim(*x_lims)
+
+    s = 'b' * N + 'r' * N
+    plt.scatter(Data[:,0], Data[:,1], s=5, alpha=1, c=list(s))
+    plt.legend()
+    plt.show()
 
 
 def main():
-    task_2()
+    task_3()
