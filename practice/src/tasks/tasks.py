@@ -48,6 +48,40 @@ def task_1():
     
     plt.show()
 
+def task_2():
+    # (X^T*X + lambda*I)*beta = X^T*y
+    # find beta:
+    lamb = 1
+    n = 3
+
+    x = np.linspace(0,2*np.pi,40)
+    y = np.sin(x)+np.random.normal(0,0.4,40)
+
+    pf = pr.PolynomialFeatures(n)
+
+    X = pf.fit_transform(x.reshape(-1, 1))
+    I = np.identity(n+1)
+    I[0,0] = 0
+    A = lambda l: (np.matmul(X.T, X) + l * I)
+    b = np.matmul(X.T, y)
+
+    beta = np.linalg.solve(A(lamb), b)
+
+    rr = lm.Ridge(alpha=lamb)
+    rr.fit(X, y)
+
+    print(np.sum((beta - rr.coef_)**2))
+    print(beta, rr.coef_)
+
+    plt.scatter(x, y)
+    plt.plot(x, rr.predict(X))
+    plt.plot(x, [np.matmul(a, beta) for a in X])
+    plt.show()
+
+
+def task_3():
+    pass
+
 
 def main():
-    task_1()
+    task_2()
