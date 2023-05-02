@@ -1,10 +1,13 @@
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import Ridge, Lasso
+from sklearn.linear_model import Ridge, Lasso, LogisticRegression
 from sklearn.model_selection import GridSearchCV
 import sklearn.preprocessing as pr
 import sklearn.model_selection as ms
+import pandas as pd
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import datasets
 
 matplotlib.use('TkAgg')
 
@@ -73,5 +76,35 @@ def task_2():
     plt.scatter(x,y)
     plt.show()
 
+def task_3():
+    iris = datasets.load_iris()
+    X = iris.data[:, :2]  # we only take the first two features
+    y = iris.target
+
+    X_train, X_test, y_train, y_test = ms.train_test_split(X, y, train_size=0.7)
+
+    lr = LogisticRegression(penalty='l1', solver='liblinear')
+    gs = GridSearchCV(lr, {'C': 1 / (len(X_train)*np.logspace(-2, 3, 100))}, cv=8, scoring='neg_mean_absolute_error')
+    gs.fit(X_train, y_train)
+
+    lr1 = LogisticRegression(penalty='l1', solver='liblinear', C=gs.best_params_['C'])
+    lr1.fit(X_train, y_train)
+
+    lr2 = LogisticRegression()
+    lr2.fit(X_train, y_train)
+
+    print(confusion_matrix(y_test, lr1.predict(X_test)))
+    print(confusion_matrix(y_test, lr2.predict(X_test)))
+
+    Xp, Yp = np.meshgrid(np.linspace(min(X[:, 0]), max(X[:, 0]), 100), np.linspace(min(X[:, 1]), max(X[:, 1]), 100))
+    Z1 = [lr1.predict([[Xp[i,j], Yp[i,j]] for j in range(100)]) for i in range(100)]
+    Z2 = np.array([lr2.predict([[Xp[i,j], Yp[i,j]] for j in range(100)]) for i in range(100)])
+
+    plt.contour(Xp, Yp, Z1)
+    plt.contour(Xp, Yp, Z2)
+
+    plt.scatter(X[:, 0], X[:, 1], c=y)
+    plt.show()
+
 def main():
-    task_2()
+    task_3()
