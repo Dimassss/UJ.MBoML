@@ -8,6 +8,7 @@ import sklearn.model_selection as ms
 import pandas as pd
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn import datasets
+from src.tasks.task_4 import main as task_4
 
 matplotlib.use('TkAgg')
 
@@ -105,6 +106,7 @@ def task_3():
 
     plt.scatter(X[:, 0], X[:, 1], c=y)
     plt.show()
+    
 
 def main():
-    task_3()
+    task_4()
