@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib
 from sklearn.datasets import load_iris, make_moons
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+
 matplotlib.use('TkAgg')
 
 
@@ -112,5 +115,60 @@ def task_3():
     plt.show()
 
 
+def task_4():
+    X, y = make_moons(n_samples=200, noise=.3)
+
+    svm=SVC(kernel='rbf', random_state=0)
+    C = np.linspace(100, 0.5, 100)
+
+    train_scores, test_scores = validation_curve(
+        svm, X, y, param_name='C', param_range=C, cv=6, scoring='accuracy'
+    )
+
+    mean_train = np.mean(train_scores, axis=1)
+    mean_test = np.mean(test_scores, axis=1)
+
+    std_train = np.std(train_scores, axis=1)
+    std_test = np.std(test_scores, axis=1)
+
+    plt.plot(C, mean_train, label='train')
+    plt.plot(C, mean_test, label='test')
+
+    plt.fill_between(C, mean_train - std_train, mean_train + std_train, alpha=0.2)
+    plt.fill_between(C, mean_test - std_test, mean_test + std_test, alpha=0.2)
+
+    plt.legend()
+    plt.show()
+
+
+def task_5():
+    n_samples, n_features = 300, 50
+    X, y = make_classification(
+        n_samples=n_samples, n_features=n_features, random_state=1
+    )
+
+    svm=SVC(kernel='rbf', random_state=0)
+    C = np.linspace(100, 0.5, 100)
+
+    train_scores, test_scores = validation_curve(
+        svm, X, y, param_name='C', param_range=C, cv=6, scoring='accuracy'
+    )
+
+    mean_train = np.mean(train_scores, axis=1)
+    mean_test = np.mean(test_scores, axis=1)
+
+    std_train = np.std(train_scores, axis=1)
+    std_test = np.std(test_scores, axis=1)
+
+    plt.plot(C, mean_train, label='train')
+    plt.plot(C, mean_test, label='test')
+
+    plt.fill_between(C, mean_train - std_train, mean_train + std_train, alpha=0.2)
+    plt.fill_between(C, mean_test - std_test, mean_test + std_test, alpha=0.2)
+
+    plt.legend()
+    plt.show()
+
+
 def main():
-    task_3()
+    task_5()
