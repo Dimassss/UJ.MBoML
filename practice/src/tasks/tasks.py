@@ -5,9 +5,8 @@ import numpy as np
 from sklearn.model_selection import learning_curve, train_test_split, validation_curve
 import matplotlib.pyplot as plt
 import matplotlib
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris, make_moons
 from sklearn.neighbors import KNeighborsClassifier
-
 matplotlib.use('TkAgg')
 
 
@@ -87,5 +86,31 @@ def task_2():
     plt.show()
 
 
+def task_3():
+    X, y = make_moons(n_samples=200, noise=.3)
+
+    knn = KNeighborsClassifier()
+    K = list(range(1, 39))
+
+    train_scores, test_scores = validation_curve(
+        knn, X, y, param_name='n_neighbors', param_range=K, cv=10
+    )
+
+    mean_train = np.mean(train_scores, axis=1)
+    mean_test = np.mean(test_scores, axis=1)
+
+    std_train = np.std(train_scores, axis=1)
+    std_test = np.std(test_scores, axis=1)
+
+    plt.plot(K, mean_train)
+    plt.plot(K, mean_test)
+
+    plt.fill_between(K, mean_train - std_train, mean_train + std_train, alpha=0.2)
+    plt.fill_between(K, mean_test - std_test, mean_test + std_test, alpha=0.2)
+
+    plt.legend()
+    plt.show()
+
+
 def main():
-    task_2()
+    task_3()
