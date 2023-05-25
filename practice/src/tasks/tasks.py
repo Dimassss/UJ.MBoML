@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib
+from  sklearn.neural_network import MLPClassifier
+from sklearn import datasets
+import matplotlib.pyplot as plt
 
 matplotlib.use('TkAgg')
 
@@ -96,9 +99,35 @@ def task_3():
     http://playground.tensorflow.org/#activation=tanh&regularization=L2&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.001&regularizationRate=0.1&noise=0&networkShape=1&seed=0.23623&showTestData=false&discretize=false&percTrainData=80&x=false&y=false&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false
     http://playground.tensorflow.org/#activation=tanh&regularization=L2&batchSize=10&dataset=xor&regDataset=reg-plane&learningRate=0.001&regularizationRate=0.1&noise=0&networkShape=1&seed=0.85487&showTestData=false&discretize=false&percTrainData=80&x=false&y=false&xTimesY=true&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false
     http://playground.tensorflow.org/#activation=sigmoid&regularization=L2&batchSize=10&dataset=gauss&regDataset=reg-plane&learningRate=0.001&regularizationRate=0.1&noise=0&networkShape=1&seed=0.10434&showTestData=false&discretize=false&percTrainData=80&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false
-    
+
 
     """
 
+def task_4():
+    def train(n=0, ax=plt):
+        iris = datasets.load_iris()
+        X = iris.data[:, :2]
+        y = iris.target
+
+        mlp=MLPClassifier(hidden_layer_sizes=((n,) if n > 0 else []),activation='logistic',max_iter=5000)
+        mlp.fit(X, y)
+
+        x_min, x_max = X[:, 0].min() - 0.5, X[:, 0].max() + 0.5
+        y_min, y_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.02), np.arange(y_min, y_max, 0.02))
+
+        Z = mlp.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+        ax.contourf(xx, yy, Z, alpha=0.8, cmap=plt.cm.RdYlBu)
+        ax.scatter(X[:, 0], X[:, 1], c=y)
+        plt.title("NN for "+str(n)+" neurons")
+
+    train(0, plt.subplot(2, 2, 1))
+    train(2, plt.subplot(2, 2, 2))
+    train(4, plt.subplot(2, 2, 3))
+    train(10, plt.subplot(2, 2, 4))
+
+    plt.show()
+
 def main():
-    task_2(20)
+    task_4()
