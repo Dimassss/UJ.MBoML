@@ -91,5 +91,14 @@ def task_2(n):
 
     print(np.mean(np.abs(l2 - y)))
 
+def task_3():
+    """
+    http://playground.tensorflow.org/#activation=tanh&regularization=L2&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.001&regularizationRate=0.1&noise=0&networkShape=1&seed=0.23623&showTestData=false&discretize=false&percTrainData=80&x=false&y=false&xTimesY=true&xSquared=true&ySquared=true&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false
+    http://playground.tensorflow.org/#activation=tanh&regularization=L2&batchSize=10&dataset=xor&regDataset=reg-plane&learningRate=0.001&regularizationRate=0.1&noise=0&networkShape=1&seed=0.85487&showTestData=false&discretize=false&percTrainData=80&x=false&y=false&xTimesY=true&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false
+    http://playground.tensorflow.org/#activation=sigmoid&regularization=L2&batchSize=10&dataset=gauss&regDataset=reg-plane&learningRate=0.001&regularizationRate=0.1&noise=0&networkShape=1&seed=0.10434&showTestData=false&discretize=false&percTrainData=80&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false
+    
+
+    """
+
 def main():
     task_2(20)
