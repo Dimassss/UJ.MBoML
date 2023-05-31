@@ -34,11 +34,11 @@ def task_1():
 
     np.random.seed(1)
     W1 = np.array([2*np.random.random((3,1)) - 1 for i in range(2)]).T
+    # W1 = (2*np.random.random((2,3)) - 1).T
 
     for i in range(1000):
         for j in range(len(X)):
             l0 = X[j,:]
-            print()
             l1 = nonlin(np.dot(l0, W1))
             
             l1_err = y[j,:] - l1
@@ -46,7 +46,7 @@ def task_1():
 
             W1 += np.dot(l0.reshape(-1,1), l1_delta)
 
-    err = lambda k: np.linalg.norm(nonlin(np.dot(X[k,:], W1)) - y[k])
+    err = lambda k: np.linalg.norm(np.round(nonlin(np.dot(X[k,:], W1))) - y[k])
     print(np.mean([err(k) for k in range(len(y))]))
 
 
@@ -130,4 +130,4 @@ def task_4():
     plt.show()
 
 def main():
-    task_4()
+    task_1()
