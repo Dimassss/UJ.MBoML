@@ -1,8 +1,4 @@
 import os
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 def run():
     from src.tasks.tasks import main as run_tasks
