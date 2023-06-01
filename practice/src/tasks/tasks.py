@@ -48,6 +48,98 @@ def task_1():
 
         best_mlp.fit(X1, y1)
 
+        yp = best_mlp.predict(X1)
+
+        CM = m.confusion_matrix(y1, yp)
+        print(f"\n\n====| k = {k} |====\n")
+        print('Confusion matrix:\n', CM)
+        print(f"f1 = {m.f1_score(y1, yp)}")
+        print(f"Percent of succesful predictions: {100 * ((CM[0,0] + CM[1,1])/np.sum(CM))}%")
+
+        train_scores, valid_scores = ms.validation_curve(
+            nn.MLPClassifier(max_iter=100000, **best_mlp.best_params_),
+            X1, y1,
+            param_name='hidden_layer_sizes',
+            param_range=[(k,), (k,k), (k,k,k,), (k,k,k,k,), (k,k,k,k,k,)]
+        )
+
+        train_mean = np.mean(train_scores, axis=1)
+        train_std = np.std(train_scores, axis=1)
+        valid_mean = np.mean(valid_scores, axis=1)
+        valid_std = np.std(valid_scores, axis=1)
+
+        ax = fig.add_subplot(3,3,k)
+        plt.title(f"Validation Curve for k={k}")
+        plt.xlabel("Parameter Value")
+        plt.ylabel("Score")
+        plt.ylim(0.0, 1.1)
+        param_range = [1,2,3,4,5]
+        ax.plot(param_range, train_mean, label="Training score", color="r")
+        ax.plot(param_range, valid_mean, label="Cross-validation score", color="g")
+        ax.fill_between(
+            param_range,
+            train_mean - train_std,
+            train_mean + train_std,
+            alpha=0.2,
+            color="r"
+        )
+        ax.fill_between(
+            param_range,
+            valid_mean - valid_std,
+            valid_mean + valid_std,
+            alpha=0.2,
+            color="g"
+        )
+        plt.legend(loc="best")
+
+
+    plt.show()
+
+    print('Linera regression: ')
+
+    clf = lm.LogisticRegression()
+    clf.fit(X1, y1)
+
+    yp = clf.predict(X11)
+
+    CM = m.confusion_matrix(y1, yp)
+    print('Confusion matrix:\n', CM)
+    print(f"f1 = {m.f1_score(y1, yp)}")
+    print(f"Percent of succesful predictions: {100 * ((CM[0,0] + CM[1,1])/np.sum(CM))}%")
+
+
+def task_2():
+    # Data preperation
+    data = pd.read_csv('./practice/src/resources/chredlin.csv')
+    print(data.head())
+
+    sides = np.unique(data['side'])
+    print('Sides: ', ', '.join(sides))
+
+    X = pr.StandardScaler().fit_transform(data.iloc[:, 1:7])
+    X = pd.DataFrame(X, columns=data.iloc[:, 1:7].columns)
+
+    y = data.iloc[:, 7]
+    y = (y == y[0]).astype(int)
+
+    X['y'] = y
+    X.dropna(inplace=True)
+    y = X['y']
+    X = X.loc[:, X.columns != 'y']
+
+    print(X.head())
+
+    fig = plt.figure(figsize=(10, 6))
+
+    for k in range(max(1, round(0.2 * len(X.columns))), round(1.5 * len(X.columns))):
+        best_mlp = ms.GridSearchCV(nn.MLPClassifier(max_iter=100000, hidden_layer_sizes=(k,)), param_grid={
+            'solver': ['lbfgs', 'sgd', 'adam'],
+            'activation': ['tanh', 'relu', 'logistic'],
+            'alpha': [0.001, 0.01, 0.1]
+        })
+
+        best_mlp.fit(X, y)
+
         yp = best_mlp.predict(X)
 
         CM = m.confusion_matrix(y, yp)
@@ -107,5 +199,61 @@ def task_1():
     print(f"f1 = {m.f1_score(y, yp)}")
     print(f"Percent of succesful predictions: {100 * ((CM[0,0] + CM[1,1])/np.sum(CM))}%")
 
+
+
+def task_3():
+    # Data preperation
+    data = pd.read_csv('./practice/src/resources/wbca.csv')
+    print(data.head())
+
+    cclass = np.unique(data['Class'])
+    print('CLass: ', cclass)
+
+    X = pr.StandardScaler().fit_transform(data.iloc[:, 2:11])
+    X = pd.DataFrame(X, columns=data.iloc[:, 2:11].columns)
+
+    y = data.iloc[:, 1]
+    y = (y == y[0]).astype(int)
+
+    X['y'] = y
+    X.dropna(inplace=True)
+    y = X['y']
+    X = X.loc[:, X.columns != 'y']
+
+    print(X.head())
+
+    fig = plt.figure(figsize=(10, 6))
+
+    for k in range(max(1, round(0.2 * len(X.columns))), round(1.5 * len(X.columns))):
+        best_mlp = ms.GridSearchCV(nn.MLPClassifier(max_iter=200000, hidden_layer_sizes=(k,)), param_grid={
+            'solver': ['lbfgs', 'sgd', 'adam'],
+            'activation': ['tanh', 'relu', 'logistic'],
+            'alpha': [0.001, 0.01, 0.1]
+        })
+
+        best_mlp.fit(X, y)
+
+        yp = best_mlp.predict(X)
+
+        CM = m.confusion_matrix(y, yp)
+        print(f"\n\n====| k = {k} |====\n")
+        print('Confusion matrix:\n', CM)
+        print(f"f1 = {m.f1_score(y, yp)}")
+        print(f"Percent of succesful predictions: {100 * ((CM[0,0] + CM[1,1])/np.sum(CM))}%")
+
+
+    print('Linera regression: ')
+
+    clf = lm.LogisticRegression()
+    clf.fit(X, y)
+
+    yp = clf.predict(X)
+
+    CM = m.confusion_matrix(y, yp)
+    print('Confusion matrix:\n', CM)
+    print(f"f1 = {m.f1_score(y, yp)}")
+    print(f"Percent of succesful predictions: {100 * ((CM[0,0] + CM[1,1])/np.sum(CM))}%")
+
+
 def main():
-    task_1()
+    task_3()
