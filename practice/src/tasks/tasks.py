@@ -122,5 +122,31 @@ def task_2_():
     plt.ylabel('Gap Statistic')
     plt.show()
 
+
+def task_3():
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.feature_selection import RFE
+    from sklearn.linear_model import LogisticRegression
+
+    data = load_breast_cancer()
+
+    X = data.data 
+    y = data.target 
+
+    print("Data shape:", X.shape)
+    print("Target shape:", y.shape)
+
+    model = LogisticRegression(solver='liblinear')
+    rfe = RFE(estimator=model, n_features_to_select=5)
+
+    rfe.fit(X, y)
+
+    print("Feature Ranking: ", rfe.ranking_)
+
+    selected_features = np.array(data.feature_names)[rfe.support_]
+    print("Selected features:", selected_features)
+
+
+
 def main():
-    task_2_()
+    task_3()
